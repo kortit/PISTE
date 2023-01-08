@@ -19,6 +19,16 @@ export class SpotifyService {
     this.spotify.play();
   }
 
+  public pause(){
+    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.pause();
+  }
+
+  public next(){
+    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.skipToNext();
+  }
+
   public getMe(): Observable<SpotifyApi.CurrentUsersProfileResponse>{
     this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
     return from(this.spotify.getMe());

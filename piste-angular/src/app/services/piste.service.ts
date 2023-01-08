@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AccessToken } from './model/AccessToken';
 import { map, Observable, of } from 'rxjs';
+import { AccessToken } from '../model/AccessToken';
 
 @Injectable({
   providedIn: 'root'

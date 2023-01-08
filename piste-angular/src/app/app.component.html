@@ -1,13 +1,5 @@
-<header>
-    <div>Paroles, Interpretation et Son : le Test d'Ecoute !</div>
-    <div *ngIf="username">Connecté à Spotify en tant que <strong>{{username}}</strong>
-        <button (click)="spotifyAuthorizationClick()">Changer de Compte</button>
-    </div>
-    <div *ngIf="!username">Pas encore connecté à Spotify
-        <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button>
-    </div>
-</header>
-
-<button (click)="playClick()">Play</button>
-
-<iframe *ngIf="embedURI" [src]="embedURI" width="800" height="600" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<app-header [username]="userinfo?.display_name"></app-header>
+<mat-form-field>
+    <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
+</mat-form-field>
+<div><div id="spotify-iframe"></div></div>

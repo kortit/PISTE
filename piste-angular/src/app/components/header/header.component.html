@@ -1,0 +1,10 @@
+<header>
+    <div>Paroles, Interpretation et Son : le Test d'Ecoute !</div>
+    <div *ngIf="username">Connecté à Spotify en tant que <strong>{{username}}</strong>
+        <button (click)="spotifyAuthorizationClick()">Changer de Compte</button>
+    </div>
+    <div *ngIf="!username">Pas encore connecté à Spotify
+        <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button>
+    </div>
+    <mat-slide-toggle [(ngModel)]="displaySong" (ngModelChange)="onChangeDisplaySong($event)">Afficher la chanson</mat-slide-toggle>
+</header>
