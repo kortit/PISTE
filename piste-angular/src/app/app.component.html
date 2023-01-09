@@ -1,5 +1,37 @@
-<app-header [username]="userinfo?.display_name"></app-header>
-<mat-form-field>
-    <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
-</mat-form-field>
-<div><div id="spotify-iframe"></div></div>
+<header>
+    <div class="title border">
+        <span class="title1">PISTE</span><br>
+        <span class="subtitle">Paroles, Interprètes et Sons : le Test d'Ecoute !</span>
+    </div>
+    <!-- 
+    <div *ngIf="username">Connecté à Spotify en tant que <strong>{{username}}</strong>
+        <button (click)="spotifyAuthorizationClick()">Changer de Compte</button>
+    </div>
+    
+    <div *ngIf="!username">Pas encore connecté à Spotify
+        <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button>
+    </div>
+    -->
+</header>
+
+<div class="controls border">
+    <mat-form-field class="playlist-input">
+        <mat-label>URL Spotify de la playlist</mat-label>
+        <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
+        <mat-hint class="mat-error" *ngIf="inputPlayListErrorMessage">{{inputPlayListErrorMessage}}</mat-hint>
+    </mat-form-field>
+    <mat-slide-toggle [(ngModel)]="displaySong" (ngModelChange)="onChangeDisplaySong($event)">Afficher la playlist</mat-slide-toggle>
+</div>
+
+<div [ngClass]="{'hidden': !preference.displaySong}"><div id="spotify-iframe"></div></div>
+
+<div class="players" *ngIf="gameState">
+    <div class="player border" *ngFor="let player of gameState.players | keyvalue" [ngClass]="{'active-player': player.value.active}">
+        <div class="player-score">{{player.value.name}}</div>
+        <div class="player-score">{{player.value.score}}</div>
+        <div class="player-hotkey">{{player.value.hotkeys.join(' - ')}}</div>
+    </div>
+    <div *ngIf="gameState.players.size < 8" class="player border add-player" (click)="addPlayerClick()">
+        <mat-icon class="add-icon" aria-hidden="false" aria-label="Add Player" fontIcon="add_circle"></mat-icon>
+    </div>
+</div>

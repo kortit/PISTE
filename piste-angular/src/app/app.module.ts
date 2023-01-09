@@ -5,7 +5,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { ControlsComponent } from './components/controls/controls.component';
-import { HeaderComponent } from './components/header/header.component';
 import { PlayingComponent } from './components/playing/playing.component';
 import { PlayerComponent } from './components/player/player.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -14,12 +13,12 @@ import { FormsModule } from '@angular/forms';
 import { WindowRef } from './WindowRef';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    HeaderComponent,
     PlayingComponent,
     ControlsComponent,
     PlayerComponent
@@ -33,6 +32,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatSlideToggleModule,
     MatInputModule,
     MatFormFieldModule,
+    MatIconModule,
     FormsModule
   ],
   providers: [WindowRef],

@@ -39,4 +39,9 @@ export class SpotifyService {
     return from(this.spotify.getMyCurrentPlayingTrack());
   }
 
+  public getPlaylist(id: string): Observable<SpotifyApi.SinglePlaylistResponse>{
+    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    return from(this.spotify.getPlaylist(id));
+  }
+
 }

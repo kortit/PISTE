@@ -1,5 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { GameState } from './model/GameState';
 import { Preference } from './model/Preference';
+import { GameService } from './services/game.service';
 import { PreferenceService } from './services/preference.service';
 import { SpotifyOauth2Service } from './services/spotify-oauth2.service';
 import { SpotifyService } from './services/spotify.service';
@@ -12,7 +14,8 @@ import { WindowRef } from './WindowRef';
 })
 export class AppComponent implements OnInit{
 
-  constructor(private spotifyService: SpotifyService, private spotifyAuthorization: SpotifyOauth2Service, private preferenceService: PreferenceService, private winRef: WindowRef){}
+  constructor(private spotifyService: SpotifyService, private spotifyAuthorization: SpotifyOauth2Service, 
+    private preferenceService: PreferenceService, private gameService: GameService, private winRef: WindowRef){}
 
   preference: Preference = new Preference();
 
@@ -20,71 +23,133 @@ export class AppComponent implements OnInit{
 
   uri: SpotifyApi.CurrentlyPlayingResponse | undefined;
 
-  uriPlayList = "spotify:playlist:37i9dQZF1DXacPj7eARo6k";
+  inputPlayListErrorMessage: string = '';
 
   EmbedController: any
 
   playlistRef: string = '';
+
+  username: string | undefined; 
+
+  displaySong: boolean = true;
+
+  gameState: GameState = new GameState();
+
+  blocked: boolean = false;
+
+  playing = false;
 
   ngOnInit(): void {
     this.spotifyAuthorization.tryCodeExchange(); 
     if(this.spotifyAuthorization.isLoggedIn()){
       this.spotifyService.getMe().subscribe(userInfo => this.userinfo = userInfo);
     }
+
     this.preferenceService.preference.subscribe(preference => this.preference = preference);
-    this.refreshCurrentlyPlaying();
 
     this.winRef.nativeWindow.onSpotifyIframeApiReady = (IFrameAPI: any) => {
       let element = document.getElementById('spotify-iframe');
       let options = {};
-      let callback = (EmbedController: any) => {this.EmbedController = EmbedController};
+      let callback = (EmbedController: any) => {
+        this.EmbedController = EmbedController;
+        EmbedController.addListener('playback_update', (e: any) => {
+          if(this.playing==e.data.isPaused){
+            console.log("now "+ (e.data.isPaused? "paused" : "playing"));
+          }
+          this.playing = !e.data.isPaused;
+        });
+      };
       IFrameAPI.createController(element, options, callback);
     };
+
+    this.gameService.gameState.subscribe(gameState => {this.gameState = gameState, console.log("update")});
   }
 
   @HostListener('document:keypress', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
+    event.preventDefault();
+    let playerBuzzer = this.gameState?.hotkeys.get(event.key?.toLocaleLowerCase());
+    let blockedbefore = this.blocked;
+    this.blocked = true;
+    if(playerBuzzer && !blockedbefore){
+      // player buzzed
+      if(this.playing){
+        console.log("toggle");
+        this.EmbedController.togglePlay();
+      }
+      let player = this.gameState?.players.get(playerBuzzer);
+      if(player){
+        player.active = true;
+      }
+    }else{
+      this.blocked = blockedbefore;
+    }
     switch (event.key?.toLocaleLowerCase()) {
-      case "a":
-      case "b":  
-          this.spotifyService.pause();
-          break;
       case " ":  
+          console.log("toggle");
           this.EmbedController.togglePlay();
+          this.deactivateAllPlayers();
+          this.blocked = false;
+          break;
+      case "enter":  
+          this.EmbedController.seek(1000000);     
+          if(!this.playing){
+            console.log("toggle before seek");
+            this.EmbedController.togglePlay();
+          }  
+          this.deactivateAllPlayers();
+          this.blocked = false;
           break;
       default:
-          console.log("'"+event.key?.toLocaleLowerCase()+"' pressed");
           break;
     }
+  }
+
+  deactivateAllPlayers(){
+    this.gameState.players.forEach(player => player.active = false);
+  }
+
+  spotifyAuthorizationClick(): void {
+    this.spotifyAuthorization.startAuthorizationFlow();
+  }
+
+  onChangeDisplaySong(event: boolean): void {
+    this.preferenceService.patchPreference({"displaySong": event});
   }
 
   onPlaylistInput(playlistRef: string): void {
+
+    this.inputPlayListErrorMessage = "";
+    let playlistId = '';
+
     // https://open.spotify.com/playlist/37i9dQZF1DXacPj7eARo6k?si=2021bc5b128341ed
-    let regexp = /playlist\/([A-Za-z0-9])+\??/g
-    let id = playlistRef.match(regexp);
-    if(id){
-      console.log(id);
-    }else{
-      console.log("pas ok");
+    let regexpFullUrl = /playlist\/([A-Za-z0-9]{18,})\??/
+    let id = playlistRef.match(regexpFullUrl);
+    if(id && id[1]){
+      playlistId=id[1]
     }
+    // 37i9dQZF1DXacPj7eARo6k
+    let regexpIdOnly = /^([A-Za-z0-9]{18,})\??$/
+    id = playlistRef.match(regexpIdOnly);
+    if(id && id[1]){
+      playlistId=id[1]
+    }
+
+    if(!playlistId && playlistRef){
+      this.inputPlayListErrorMessage = "Playlist Spotify non valide, donne l'URL de la playlist, par exemple https://open.spotify.com/playlist/37i9dQZF1DXacPj7eARo6k"
+      return;
+    }
+
+    this.displayPlaylistIframe('spotify:playlist:'+playlistId)
+
   }
 
   displayPlaylistIframe(playlisturi: string){
-    this.EmbedController.loadUri('spotify:playlist:7makk4oTQel546B0PZlDM5');
+    this.EmbedController.loadUri(playlisturi);
   }
 
-  nextClick(): void{
-    this.spotifyService.next();
-    setTimeout(() => {
-      this.refreshCurrentlyPlaying();
-    }, 700);
-    setTimeout(() => {
-      this.refreshCurrentlyPlaying();
-    }, 2000);
-  }
-
-  refreshCurrentlyPlaying(){
-    //this.spotifyService.getCurrentSong().subscribe(track => this.currentlyPlaying = track);
+  addPlayerClick(){
+    this.gameService.addPlayer();
   }
 
 }

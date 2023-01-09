@@ -37,7 +37,22 @@ body{
     --mdc-theme-text-primary-on-background: #ffe877;
     background-color: black;
     color: #ffe877;
+    font-family: impact, Roboto, "Helvetica Neue", sans-serif;
+    padding: 5px;
 }
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.hidden{
+  visibility: hidden;
+  display: none;
+}
+
+h1 {
+  font-style: normal;
+  font-size: 20px;
+}
+
+.border {
+  border: 2px solid #ffe877;
+}
