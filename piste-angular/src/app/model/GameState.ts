@@ -1,4 +1,5 @@
 export class PlayerState{
+    index: number=0;
     name: string = "";
     score: number = 0;
     sounds: string[] = [];
@@ -8,6 +9,6 @@ export class PlayerState{
 
 export class GameState {
     spotifyPlaylist: string = "";
-    players: Map<string, PlayerState> = new Map();
-    hotkeys: Map<string, string> = new Map();
+    players: Map<number, PlayerState> = new Map();
+    hotkeys: Map<string, number> = new Map();
 }

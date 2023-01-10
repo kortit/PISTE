@@ -31,8 +31,6 @@ export class AppComponent implements OnInit{
 
   username: string | undefined; 
 
-  displaySong: boolean = true;
-
   gameState: GameState = new GameState();
 
   blocked: boolean = false;
@@ -64,10 +62,14 @@ export class AppComponent implements OnInit{
 
     this.gameService.gameState.subscribe(gameState => {this.gameState = gameState, console.log("update")});
   }
-
-  @HostListener('document:keypress', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
+/*
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEventDown(event: KeyboardEvent) { 
     event.preventDefault();
+  }
+*/
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEventPressed(event: KeyboardEvent) { 
     let playerBuzzer = this.gameState?.hotkeys.get(event.key?.toLocaleLowerCase());
     let blockedbefore = this.blocked;
     this.blocked = true;
@@ -80,6 +82,9 @@ export class AppComponent implements OnInit{
       let player = this.gameState?.players.get(playerBuzzer);
       if(player){
         player.active = true;
+        if(this.preference.playSounds){
+          this.playSound(player.sounds[Math.floor(Math.random()*player.sounds.length)])
+        }        
       }
     }else{
       this.blocked = blockedbefore;
@@ -87,11 +92,13 @@ export class AppComponent implements OnInit{
     switch (event.key?.toLocaleLowerCase()) {
       case " ":  
           console.log("toggle");
+          event.preventDefault();
           this.EmbedController.togglePlay();
           this.deactivateAllPlayers();
           this.blocked = false;
           break;
       case "enter":  
+          event.preventDefault();
           this.EmbedController.seek(1000000);     
           if(!this.playing){
             console.log("toggle before seek");
@@ -109,12 +116,26 @@ export class AppComponent implements OnInit{
     this.gameState.players.forEach(player => player.active = false);
   }
 
+  removePlayer(playerIndex: number){
+    this.gameService.removePlayer(playerIndex);
+  }
+
+  incrementScore(playerIndex: number){
+    this.gameService.incrementScore(playerIndex);
+  }
+  decrementScore(playerIndex: number){
+    this.gameService.incrementScore(playerIndex, -1);
+  }
+
   spotifyAuthorizationClick(): void {
     this.spotifyAuthorization.startAuthorizationFlow();
   }
 
   onChangeDisplaySong(event: boolean): void {
     this.preferenceService.patchPreference({"displaySong": event});
+  }
+  onChangePlaySound(event: boolean): void {
+    this.preferenceService.patchPreference({"playSounds": event});
   }
 
   onPlaylistInput(playlistRef: string): void {
@@ -150,6 +171,13 @@ export class AppComponent implements OnInit{
 
   addPlayerClick(){
     this.gameService.addPlayer();
+  }
+
+  playSound(sound: string){
+    let audio = new Audio();
+    audio.src = "../assets/"+sound;
+    audio.load();
+    audio.play();
   }
 
 }

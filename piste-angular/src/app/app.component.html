@@ -20,16 +20,24 @@
         <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
         <mat-hint class="mat-error" *ngIf="inputPlayListErrorMessage">{{inputPlayListErrorMessage}}</mat-hint>
     </mat-form-field>
-    <mat-slide-toggle [(ngModel)]="displaySong" (ngModelChange)="onChangeDisplaySong($event)">Afficher la playlist</mat-slide-toggle>
+    <div class="preferences-input">
+        <mat-slide-toggle class="preference-input" [(ngModel)]="preference.displaySong" (ngModelChange)="onChangeDisplaySong($event)">Afficher la playlist</mat-slide-toggle>
+        <mat-slide-toggle class="preference-input" [(ngModel)]="preference.playSounds" (ngModelChange)="onChangePlaySound($event)">Annoncer le joueur qui a buzzé</mat-slide-toggle>
+    </div>
+    
 </div>
 
 <div [ngClass]="{'hidden': !preference.displaySong}"><div id="spotify-iframe"></div></div>
 
 <div class="players" *ngIf="gameState">
     <div class="player border" *ngFor="let player of gameState.players | keyvalue" [ngClass]="{'active-player': player.value.active}">
-        <div class="player-score">{{player.value.name}}</div>
-        <div class="player-score">{{player.value.score}}</div>
-        <div class="player-hotkey">{{player.value.hotkeys.join(' - ')}}</div>
+        <div class="player-name player-section">{{player.value.name}}</div>
+        <div class="player-score player-section" (click)="incrementScore(player.value.index)">{{player.value.score}}</div>
+        <div class="player-controls player-section">
+            <div class="player-hotkey">{{player.value.hotkeys.join(' - ')}}</div>
+            <div class="player-decrement" (click)="decrementScore(player.value.index)"><mat-icon class="add-icon" aria-hidden="false" aria-label="Add Player" fontIcon="arrow_drop_down_circle"></mat-icon></div>
+            <div class="player-remove" (click)="removePlayer(player.value.index)"><mat-icon class="add-icon" aria-hidden="false" aria-label="Delete Player" fontIcon="delete_forever"></mat-icon></div>
+        </div>
     </div>
     <div *ngIf="gameState.players.size < 8" class="player border add-player" (click)="addPlayerClick()">
         <mat-icon class="add-icon" aria-hidden="false" aria-label="Add Player" fontIcon="add_circle"></mat-icon>

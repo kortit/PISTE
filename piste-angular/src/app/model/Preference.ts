@@ -1,7 +1,6 @@
 export class Preference {
 
-    displaySong: boolean = true
-
-    constructor() {}
+    displaySong: boolean = true;
+    playSounds: boolean = true;
 
 }

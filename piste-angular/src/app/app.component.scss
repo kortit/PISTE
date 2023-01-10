@@ -3,11 +3,6 @@
     text-align: center;
     padding: 8px;
 }
-.controls{
-    margin: 10px 0;
-    text-align: center;
-    padding: 8px;
-}
 .title1{
     font-size: 2.5em;
     letter-spacing: 8px;
@@ -17,8 +12,20 @@
     font-size: 1.2em;
 }
 .controls{
+    margin: 10px 0;
+    text-align: center;
+    padding: 8px;
     display: flex;
     flex-direction: column;
+    .preferences-input{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+        .preference-input{
+            margin: 2px 10px;
+        }
+    }
 }
 .playlist-input{
     width: 100%;
@@ -35,7 +42,42 @@
         max-width: 500px;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
+        .player-section{
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            text-align: center;
+        }
+        .player-name{
+            flex-grow: 3;
+            border-bottom: solid 1px #ffe877;
+            font-size: 3em;
+        }
+        .player-score{
+            flex-grow: 6;
+            border-bottom: solid 1px #ffe877;
+            font-size: 4.5em;
+        }
+        .player-controls{
+            flex-grow: 2;
+            font-size: 2em;
+            text-transform: capitalize;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            .player-hotkey{
+                flex-grow: 6;
+            }
+            .player-decrement{
+                flex-grow: 6;
+                transform: scale(1.8);
+            }
+            .player-remove{
+                flex-grow: 6;
+                transform: scale(1.8);
+            }
+        }
     }
     .active-player{
         background-color: #ffe877;
@@ -46,6 +88,7 @@
     .add-icon{
         transform: scale(5);
         text-align: center;
+        align-self: center;
     }
     justify-content: center;
 }
