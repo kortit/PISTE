@@ -23,20 +23,42 @@
     <div class="preferences-input">
         <mat-slide-toggle class="preference-input" [(ngModel)]="preference.displaySong" (ngModelChange)="onChangeDisplaySong($event)">Afficher la playlist</mat-slide-toggle>
         <mat-slide-toggle class="preference-input" [(ngModel)]="preference.playSounds" (ngModelChange)="onChangePlaySound($event)">Annoncer le joueur qui a buzzé</mat-slide-toggle>
-    </div>
-    
+        <mat-slider class="preference-input" [max]="8" [min]="0" [step]="1" [discrete]="true" [showTickMarks]="false">Temps pour répondre : {{preference.expirationTime==0 ? "beaucoup": preference.expirationTime+" sec"}}<input matSliderThumb [(ngModel)]="preference.expirationTime"></mat-slider>
+    </div>    
 </div>
 
 <div [ngClass]="{'hidden': !preference.displaySong}"><div id="spotify-iframe"></div></div>
+<div [ngClass]="{'hidden': preference.displaySong}" class="bars-container">
+    <div class="bars bars-active" *ngIf="playing">
+        <div class="bar" *ngFor="let i of [].constructor(20)"></div>
+    </div>
+    <div class="bars bars-inactive" *ngIf="!playing">
+        <div class="bar"  *ngFor="let i of [].constructor(20)"></div>
+    </div>
+</div>
+
 
 <div class="players" *ngIf="gameState">
-    <div class="player border" *ngFor="let player of gameState.players | keyvalue" [ngClass]="{'active-player': player.value.active}">
-        <div class="player-name player-section">{{player.value.name}}</div>
-        <div class="player-score player-section" (click)="incrementScore(player.value.index)">{{player.value.score}}</div>
+    <div class="player border" *ngFor="let player of gameState.players | keyvalue" [ngClass]="{'speaking-player': player.value.buzzer=='speaking', 'expired-player': player.value.buzzer=='expired'}">
+        <div class="player-name player-section">
+            <mat-form-field appearance="outline" class="invisible-select">
+                <mat-select #playerInput [(ngModel)]="player.value.name" (ngModelChange)="onPlayerNameSelected($event, player.value.index); playerInput.close()">
+                  <mat-option class="option" *ngFor="let playerOption of selectPlayerOptions.keys()" [value]="playerOption" [disabled]="!selectPlayerOptions.get(playerOption)">{{playerOption}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <div class="player-score player-section pointer" (click)="incrementScore(player.value.index)">{{player.value.score}}</div>
         <div class="player-controls player-section">
-            <div class="player-hotkey">{{player.value.hotkeys.join(' - ')}}</div>
-            <div class="player-decrement" (click)="decrementScore(player.value.index)"><mat-icon class="add-icon" aria-hidden="false" aria-label="Add Player" fontIcon="arrow_drop_down_circle"></mat-icon></div>
-            <div class="player-remove" (click)="removePlayer(player.value.index)"><mat-icon class="add-icon" aria-hidden="false" aria-label="Delete Player" fontIcon="delete_forever"></mat-icon></div>
+            <div class="player-hotkey">
+                <mat-form-field appearance="outline" class="invisible-select">
+                    <mat-select multiple [(ngModel)]="player.value.hotkeys" (ngModelChange)="onPlayerHotkeysSelected($event, player.value.index)">
+                      <mat-option class="option" *ngFor="let hotkeysOption of selectHotkeysOptions.keys()" [value]="hotkeysOption" [disabled]="!selectHotkeysOptions.get(hotkeysOption) && !player.value.hotkeys.includes(hotkeysOption)">{{hotkeysOption.toUpperCase()}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="player-decrement"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Add Player" fontIcon="arrow_drop_down_circle" (click)="decrementScore(player.value.index)"></mat-icon></div>
+            <div class="player-release" *ngIf="player.value.buzzer!='inactive'"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Release Player" fontIcon="play_arrow" (click)="deactivateAllPlayers()"></mat-icon></div>
+            <div class="player-remove"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Delete Player" fontIcon="delete_forever" (click)="removePlayer(player.value.index)"></mat-icon></div>
         </div>
     </div>
     <div *ngIf="gameState.players.size < 8" class="player border add-player" (click)="addPlayerClick()">

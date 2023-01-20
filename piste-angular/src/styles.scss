@@ -45,7 +45,7 @@ html, body { height: 100%; }
 
 .hidden{
   visibility: hidden;
-  display: none;
+  height: 0;
 }
 
 h1 {
@@ -56,3 +56,8 @@ h1 {
 .border {
   border: 2px solid #ffe877;
 }
+
+.pointer{
+  cursor: pointer;
+}
+

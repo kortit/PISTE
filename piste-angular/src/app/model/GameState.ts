@@ -4,7 +4,8 @@ export class PlayerState{
     score: number = 0;
     sounds: string[] = [];
     hotkeys: string[] = [];
-    active: boolean = false;
+    buzzer: "inactive" | "speaking" | "expired" = "inactive"; // inactive, speaking, expired
+
 }
 
 export class GameState {

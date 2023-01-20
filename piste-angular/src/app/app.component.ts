@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { GameState } from './model/GameState';
 import { Preference } from './model/Preference';
 import { GameService } from './services/game.service';
@@ -15,7 +15,7 @@ import { WindowRef } from './WindowRef';
 export class AppComponent implements OnInit{
 
   constructor(private spotifyService: SpotifyService, private spotifyAuthorization: SpotifyOauth2Service, 
-    private preferenceService: PreferenceService, private gameService: GameService, private winRef: WindowRef){}
+    private preferenceService: PreferenceService, private gameService: GameService, private winRef: WindowRef, private changeDetectorRef: ChangeDetectorRef){}
 
   preference: Preference = new Preference();
 
@@ -37,6 +37,11 @@ export class AppComponent implements OnInit{
 
   playing = false;
 
+  expirationTimeout: NodeJS.Timeout | undefined;
+
+  selectPlayerOptions: Map<string, boolean> = new Map();
+  selectHotkeysOptions: Map<string, boolean> = new Map();
+
   ngOnInit(): void {
     this.spotifyAuthorization.tryCodeExchange(); 
     if(this.spotifyAuthorization.isLoggedIn()){
@@ -47,21 +52,31 @@ export class AppComponent implements OnInit{
 
     this.winRef.nativeWindow.onSpotifyIframeApiReady = (IFrameAPI: any) => {
       let element = document.getElementById('spotify-iframe');
-      let options = {};
+      let options = {"height": 500};
       let callback = (EmbedController: any) => {
         this.EmbedController = EmbedController;
         EmbedController.addListener('playback_update', (e: any) => {
-          if(this.playing==e.data.isPaused){
-            console.log("now "+ (e.data.isPaused? "paused" : "playing"));
-          }
+          let changed = this.playing==e.data.isPaused;
           this.playing = !e.data.isPaused;
+          if(changed){
+            this.changeDetectorRef.detectChanges();
+          }          
+          if(e.data.isPaused && e.data.position==0){
+            // force play at beginning of the track
+            this.EmbedController.togglePlay();
+          }
         });
       };
       IFrameAPI.createController(element, options, callback);
     };
 
-    this.gameService.gameState.subscribe(gameState => {this.gameState = gameState, console.log("update")});
+    this.gameService.gameState.subscribe(gameState => {
+        this.gameState = gameState;
+        this.selectPlayerOptions = this.gameService.getPlayerNamesWithAvailability();
+        this.selectHotkeysOptions = this.gameService.geAvailableHotkeysWithAvailability();
+    });
   }
+
 /*
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEventDown(event: KeyboardEvent) { 
@@ -76,22 +91,34 @@ export class AppComponent implements OnInit{
     if(playerBuzzer && !blockedbefore){
       // player buzzed
       if(this.playing){
-        console.log("toggle");
         this.EmbedController.togglePlay();
       }
       let player = this.gameState?.players.get(playerBuzzer);
       if(player){
-        player.active = true;
+        player.buzzer = "speaking";
         if(this.preference.playSounds){
           this.playSound(player.sounds[Math.floor(Math.random()*player.sounds.length)])
         }        
+        
       }
+      if(this.expirationTimeout){
+        clearTimeout(this.expirationTimeout);
+      }
+      if(this.preference.expirationTime){
+        this.expirationTimeout = setTimeout(() => {
+          if(player && player.buzzer=="speaking"){
+            console.log("speaking expired");
+            player.buzzer = "expired";
+            this.playSound("expiration.wav", 0.3);
+          }        
+        }, this.preference.expirationTime * 1000);
+      }     
+      
     }else{
       this.blocked = blockedbefore;
     }
     switch (event.key?.toLocaleLowerCase()) {
       case " ":  
-          console.log("toggle");
           event.preventDefault();
           this.EmbedController.togglePlay();
           this.deactivateAllPlayers();
@@ -99,21 +126,29 @@ export class AppComponent implements OnInit{
           break;
       case "enter":  
           event.preventDefault();
-          this.EmbedController.seek(1000000);     
-          if(!this.playing){
-            console.log("toggle before seek");
-            this.EmbedController.togglePlay();
-          }  
+          this.EmbedController.seek(1000000);   
           this.deactivateAllPlayers();
           this.blocked = false;
           break;
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+      case "6":
+      case "7":
+      case "8":
+      case "9":
+        this.gameService.incrementScore(parseInt(event.key?.toLocaleLowerCase()));
+        break;
       default:
-          break;
+        break;
     }
   }
 
-  deactivateAllPlayers(){
-    this.gameState.players.forEach(player => player.active = false);
+  deactivateAllPlayers(){    
+    this.gameState.players.forEach(player => player.buzzer = "inactive");
+    this.blocked = false;
   }
 
   removePlayer(playerIndex: number){
@@ -165,6 +200,14 @@ export class AppComponent implements OnInit{
 
   }
 
+  onPlayerNameSelected(name: any, playerIndex: number){
+    this.gameService.changePlayerName(name, playerIndex);
+  }
+
+  onPlayerHotkeysSelected(hotkeys: string[], playerIndex: number){
+    this.gameService.changePlayerHotkeys(hotkeys, playerIndex);
+  }
+
   displayPlaylistIframe(playlisturi: string){
     this.EmbedController.loadUri(playlisturi);
   }
@@ -173,9 +216,10 @@ export class AppComponent implements OnInit{
     this.gameService.addPlayer();
   }
 
-  playSound(sound: string){
+  playSound(sound: string, volume = 1){
     let audio = new Audio();
     audio.src = "../assets/"+sound;
+    audio.volume = volume;
     audio.load();
     audio.play();
   }

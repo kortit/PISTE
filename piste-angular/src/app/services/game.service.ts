@@ -16,7 +16,9 @@ export const PLAYER_SOUNDS: Map<string, string[]> =
   ]);
 
 
-export const HOTKEYS: string[] = ["a","z","e","r","t","y","u","i","q","s","d","f"];
+export const HOTKEYS: string[] = ["a","z","e","r","t","y","u","i","o","p",
+                                  "q","s","d","f","g","h","j","k","l","m",
+                                  "w","x","c","v","b","n"];
 
 
 @Injectable({
@@ -62,6 +64,43 @@ export class GameService {
     gameState.players.delete(playerIndex);
     playerToRemove.hotkeys.forEach(h => gameState.hotkeys.delete(h));
     this.gameState.next(gameState);
+  }
+
+  changePlayerName(newName: string, playerIndex: number){
+    let gameState = this.gameState.value;
+    let playerToAlter = gameState.players.get(playerIndex);
+    if(!playerToAlter){
+      return;
+    }
+    playerToAlter.name = newName;
+    playerToAlter.sounds = PLAYER_SOUNDS.get(playerToAlter.name) || [];
+    this.gameState.next(gameState);
+  }
+
+  changePlayerHotkeys(newHotkeys: string[], playerIndex: number){
+    let gameState = this.gameState.value;
+    let playerToAlter = gameState.players.get(playerIndex);
+    if(!playerToAlter){
+      return;
+    }
+    playerToAlter.hotkeys = newHotkeys;
+    gameState.hotkeys.forEach((value: number, key: string) => {
+      if(value==playerIndex){
+        gameState.hotkeys.delete(key);
+      }
+    });
+    newHotkeys.forEach(h => gameState.hotkeys.set(h, playerIndex));
+    this.gameState.next(gameState);
+  }
+
+  getPlayerNamesWithAvailability(){
+    let playingPlayerNames = Array.from(this.gameState.value.players.values()).map(player => player.name);
+    return new Map(Array.from(PLAYER_SOUNDS.keys()).map(p => [p, !playingPlayerNames.includes(p)]));
+  }
+
+  geAvailableHotkeysWithAvailability(){
+    let activeHotkeys = Array.from(this.gameState.value.hotkeys.keys());
+    return new Map(HOTKEYS.map(p => [p, !activeHotkeys.includes(p)]));
   }
 
   incrementScore(playerIndex: number, increment:number = 1){
