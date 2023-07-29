@@ -2,6 +2,9 @@
     margin: 10px 0;
     text-align: center;
     padding: 8px;
+    button{
+        margin: auto 1em;
+    }
 }
 .title1{
     font-size: 2.5em;
@@ -29,6 +32,19 @@
 }
 .playlist-input{
     width: 100%;
+}
+.playlist-title{
+    font-size: 2em;
+    font-style: italic;
+}
+.title-separator{
+    width: 80%;
+    margin: 1.6em auto;
+}
+.playlist-introduction{
+    margin: 50px auto;
+    text-align: center;
+    font-size: 1.5em;
 }
 .players{
     display: flex;
@@ -97,6 +113,9 @@
     }
 }
 .add-player{
+    padding: 10px;
+    text-align: center;
+    font-size: 2em;
     .add-icon{
         transform: scale(5);
         text-align: center;
@@ -114,8 +133,10 @@
     }
 }
 .bars-container{
+    height: 383px;
     display: flex;
     justify-content: center;
+    align-items: flex-end;
 }
 .bars {
     height: 152px;

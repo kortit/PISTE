@@ -112,8 +112,9 @@ export class GameService {
     this.gameState.next(gameState);
   }
 
-  resetScores(){
+  razScores(){
     let gameState = this.gameState.value;
+    gameState.players.forEach(player => player.score = 0);
     this.gameState.next(gameState);
   }
 

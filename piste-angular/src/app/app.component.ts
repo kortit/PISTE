@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { OAuthService } from 'angular-oauth2-oidc';
 import { GameState } from './model/GameState';
 import { Preference } from './model/Preference';
 import { GameService } from './services/game.service';
@@ -14,7 +15,7 @@ import { WindowRef } from './WindowRef';
 })
 export class AppComponent implements OnInit{
 
-  constructor(private spotifyService: SpotifyService, private spotifyAuthorization: SpotifyOauth2Service, 
+  constructor(private spotifyService: SpotifyService, private spotifyAuthorization: SpotifyOauth2Service,
     private preferenceService: PreferenceService, private gameService: GameService, private winRef: WindowRef, private changeDetectorRef: ChangeDetectorRef){}
 
   preference: Preference = new Preference();
@@ -29,13 +30,20 @@ export class AppComponent implements OnInit{
 
   playlistRef: string = '';
 
-  username: string | undefined; 
+  playlistTitle = "";
 
   gameState: GameState = new GameState();
+
+  gameTrackIds: string[] = [];
+  alreadyPlayed: string[] = [];
+  currentTrackId = ""
 
   blocked: boolean = false;
 
   playing = false;
+  previousPositionCheck = 0;
+
+  showTrackState: "NOT_LOADED" | "READY_TO_START" | "PLAYING" | "ANSWER" = "NOT_LOADED";
 
   expirationTimeout: NodeJS.Timeout | undefined;
 
@@ -43,21 +51,27 @@ export class AppComponent implements OnInit{
   selectHotkeysOptions: Map<string, boolean> = new Map();
 
   ngOnInit(): void {
-    this.spotifyAuthorization.tryCodeExchange(); 
-    if(this.spotifyAuthorization.isLoggedIn()){
-      this.spotifyService.getMe().subscribe(userInfo => this.userinfo = userInfo);
-    }
+
+    this.spotifyService.getMe().subscribe(userInfo => this.userinfo = userInfo);
 
     this.preferenceService.preference.subscribe(preference => this.preference = preference);
 
     this.winRef.nativeWindow.onSpotifyIframeApiReady = (IFrameAPI: any) => {
       let element = document.getElementById('spotify-iframe');
-      let options = {"height": 500};
+      let options = {"height": 380};
       let callback = (EmbedController: any) => {
         this.EmbedController = EmbedController;
         EmbedController.addListener('playback_update', (e: any) => {
-          let changed = this.playing==e.data.isPaused;
-          this.playing = !e.data.isPaused;
+          let playingBefore = this.playing;
+          // we switch to "playing" state when iframe indicates not paused and we detect actual progress in position e.data.isPaused=false and e.data.position > this.previousPositionCheck
+          // we switch to not "playing" state when iframe indicates paused (progress is not reliable to indicate a real pause) e.data.isPaused=true
+          if(e.data.isPaused){
+            this.playing = false;
+          }else{
+            // on fait la vérification supplémentaire du progrés si on veuit changer l'état (si c'était déjà "playing", on reste)
+            this.playing = this.playing || e.data.position > this.previousPositionCheck;
+          }
+          let changed = this.playing==playingBefore;
           if(changed){
             this.changeDetectorRef.detectChanges();
           }          
@@ -65,6 +79,7 @@ export class AppComponent implements OnInit{
             // force play at beginning of the track
             this.EmbedController.togglePlay();
           }
+          this.previousPositionCheck = e.data.position;
         });
       };
       IFrameAPI.createController(element, options, callback);
@@ -75,20 +90,23 @@ export class AppComponent implements OnInit{
         this.selectPlayerOptions = this.gameService.getPlayerNamesWithAvailability();
         this.selectHotkeysOptions = this.gameService.geAvailableHotkeysWithAvailability();
     });
+
+    // we prevent iframe from taking focus by resetting it on interval if it has focus.
+    setInterval((_: any) => {
+      if (document.activeElement?.tagName == "IFRAME") {
+        (document.activeElement as HTMLElement).blur();
+      }
+    }, 250);
+
   }
 
-/*
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEventDown(event: KeyboardEvent) { 
-    event.preventDefault();
-  }
-*/
+
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEventPressed(event: KeyboardEvent) { 
     let playerBuzzer = this.gameState?.hotkeys.get(event.key?.toLocaleLowerCase());
     let blockedbefore = this.blocked;
     this.blocked = true;
-    if(playerBuzzer && !blockedbefore){
+    if(playerBuzzer && !blockedbefore && this.playing){
       // player buzzed
       if(this.playing){
         this.EmbedController.togglePlay();
@@ -125,10 +143,22 @@ export class AppComponent implements OnInit{
           this.blocked = false;
           break;
       case "enter":  
-          event.preventDefault();
-          this.EmbedController.seek(1000000);   
-          this.deactivateAllPlayers();
-          this.blocked = false;
+          if(this.showTrackState=="PLAYING"){
+            // cas 1 : ça jouait et on affiche la réponse
+            this.showTrackState = "ANSWER";
+            this.deactivateAllPlayers();
+            this.blocked = true;
+          }
+          else if(this.showTrackState=="READY_TO_START" || this.showTrackState=="ANSWER"){
+            // cas 2 : on était sur l'affichage de la réponse (ou on n'avait pas commencé le jeu), on passe à la suite
+            this.showTrackState = "PLAYING";
+            this.deactivateAllPlayers();
+            this.blocked = false;
+            this.playing = false;
+            this.nextTrack();
+            this.refreshPlayerWithCurrentTrack();
+          }
+          event.preventDefault();          
           break;
       case "1":
       case "2":
@@ -166,14 +196,24 @@ export class AppComponent implements OnInit{
     this.spotifyAuthorization.startAuthorizationFlow();
   }
 
+  logoutClick(): void {
+    this.spotifyAuthorization.logout();
+    this.userinfo = undefined;
+
+  }
+
   onChangeDisplaySong(event: boolean): void {
     this.preferenceService.patchPreference({"displaySong": event});
   }
   onChangePlaySound(event: boolean): void {
     this.preferenceService.patchPreference({"playSounds": event});
   }
+  onChangeShuffle(event: boolean): void {
+    this.preferenceService.patchPreference({"shuffle": event});
+  }
 
   onPlaylistInput(playlistRef: string): void {
+    
 
     this.inputPlayListErrorMessage = "";
     let playlistId = '';
@@ -196,7 +236,17 @@ export class AppComponent implements OnInit{
       return;
     }
 
-    this.displayPlaylistIframe('spotify:playlist:'+playlistId)
+    if(this.playing){
+      // If play is not paused when playlist is updated, we pause to prevent music playing in background
+      this.EmbedController.togglePlay();
+    }
+
+    this.spotifyService.getPlaylist(playlistId).subscribe(playlist => {
+      this.playlistTitle = playlist.name;
+      this.gameTrackIds = playlist.tracks.items.map(track => track.track.id);
+      // we start from no track and trackShown=true so that next step is to start first track
+      this.showTrackState = "READY_TO_START";
+    })
 
   }
 
@@ -208,12 +258,20 @@ export class AppComponent implements OnInit{
     this.gameService.changePlayerHotkeys(hotkeys, playerIndex);
   }
 
-  displayPlaylistIframe(playlisturi: string){
-    this.EmbedController.loadUri(playlisturi);
+  loadIframeFromSpotifyUri(uri: string, forcePlay = true){
+    this.playing = false;
+    this.EmbedController.loadUri(uri);
+    if(forcePlay){
+      this.EmbedController.play();
+    }    
   }
 
   addPlayerClick(){
     this.gameService.addPlayer();
+  }
+
+  razScores(){
+    this.gameService.razScores();
   }
 
   playSound(sound: string, volume = 1){
@@ -223,5 +281,30 @@ export class AppComponent implements OnInit{
     audio.load();
     audio.play();
   }
+
+  resetFocus(){
+    console.log("test")
+  }
+
+  private nextTrack(): void{
+    if(!this.gameTrackIds){
+      return;
+    }
+    let unplayedTracksIds = this.gameTrackIds.filter(id => this.alreadyPlayed.indexOf(id) < 0);
+    if(unplayedTracksIds.length==0){
+      // no more tracks => history reset and loop the playlist
+      this.alreadyPlayed = [];
+      return this.nextTrack();
+    }
+    const nextTrack = this.preference.shuffle ? unplayedTracksIds[Math.floor(Math.random() * unplayedTracksIds.length)] : unplayedTracksIds[0];
+    this.alreadyPlayed.push(nextTrack);
+    this.currentTrackId = nextTrack;
+  }
+
+  private refreshPlayerWithCurrentTrack(play = true): void{
+    this.loadIframeFromSpotifyUri("spotify:track:"+this.currentTrackId, play);
+  }
+
+
 
 }

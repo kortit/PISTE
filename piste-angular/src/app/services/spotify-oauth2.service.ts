@@ -28,6 +28,10 @@ export class SpotifyOauth2Service {
     this.oauthService.tryLoginCodeFlow();
   }
 
+  logout(){
+    this.oauthService.logOut();
+  }
+
   tryCodeExchange(){
     this.oauthService.configure(authCodeFlowConfig);
     this.oauthService.tryLoginCodeFlow();
@@ -37,8 +41,8 @@ export class SpotifyOauth2Service {
     return this.oauthService.getAccessToken();
   }
 
-  isLoggedIn(){
-    return !!this.oauthService.getAccessToken();
+  isLoggedIn(): boolean{
+    return this.oauthService.hasValidAccessToken();
   }
   
 }

@@ -1,6 +1,5 @@
 export class Preference {
-
-    displaySong: boolean = true;
+    shuffle: boolean = false;
     playSounds: boolean = true;
     expirationTime: number = 5;
 }

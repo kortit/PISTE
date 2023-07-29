@@ -12,35 +12,35 @@ export class SpotifyService {
 
   spotify = new SpotifyWebApi();
 
-  constructor(private pisteService: PisteService, private http: HttpClient, private spotifyAuth: SpotifyOauth2Service){}
+  constructor(private pisteService: PisteService, private http: HttpClient, private spotifyAuthorization: SpotifyOauth2Service){}
 
   public play(){
-    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.setAccessToken(this.spotifyAuthorization.getAccessToken());
     this.spotify.play();
   }
 
   public pause(){
-    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.setAccessToken(this.spotifyAuthorization.getAccessToken());
     this.spotify.pause();
   }
 
   public next(){
-    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.setAccessToken(this.spotifyAuthorization.getAccessToken());
     this.spotify.skipToNext();
   }
 
   public getMe(): Observable<SpotifyApi.CurrentUsersProfileResponse>{
-    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.setAccessToken(this.spotifyAuthorization.getAccessToken());
     return from(this.spotify.getMe());
   }
 
   public getCurrentSong(): Observable<SpotifyApi.CurrentlyPlayingResponse>{
-    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.setAccessToken(this.spotifyAuthorization.getAccessToken());
     return from(this.spotify.getMyCurrentPlayingTrack());
   }
 
   public getPlaylist(id: string): Observable<SpotifyApi.SinglePlaylistResponse>{
-    this.spotify.setAccessToken(this.spotifyAuth.getAccessToken());
+    this.spotify.setAccessToken(this.spotifyAuthorization.getAccessToken());
     return from(this.spotify.getPlaylist(id));
   }
 
