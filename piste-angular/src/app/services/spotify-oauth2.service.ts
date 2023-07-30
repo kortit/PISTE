@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
+import { AuthConfig, LoginOptions, OAuthEvent, OAuthService } from 'angular-oauth2-oidc';
+import { Observer } from 'rxjs';
 
 
 const authCodeFlowConfig: AuthConfig = {
@@ -10,9 +11,8 @@ const authCodeFlowConfig: AuthConfig = {
       redirectUri: window.location.origin,
       clientId: 'a390827581254150accfba45ba921e39',
       responseType: 'code',
-      scope: 'user-read-playback-state user-modify-playback-state user-read-playback-position app-remote-control streaming user-read-email',
-      showDebugInformation: true,
-      
+      scope: '',
+      showDebugInformation: true      
 };
 
 @Injectable({
@@ -25,16 +25,24 @@ export class SpotifyOauth2Service {
   startAuthorizationFlow(){
     this.oauthService.configure(authCodeFlowConfig);
     this.oauthService.initCodeFlow();
-    this.oauthService.tryLoginCodeFlow();
-  }
-
-  logout(){
-    this.oauthService.logOut();
   }
 
   tryCodeExchange(){
     this.oauthService.configure(authCodeFlowConfig);
-    this.oauthService.tryLoginCodeFlow();
+    this.oauthService.tryLogin();
+    this.oauthService.setupAutomaticSilentRefresh();
+  }
+
+  onLoginCallback(callback: () => void){
+    this.oauthService.events.subscribe(event => {
+      if(event.type == "token_received"){
+        callback();
+      }
+    });
+  }
+
+  logout(){
+    this.oauthService.logOut();
   }
 
   getAccessToken(){

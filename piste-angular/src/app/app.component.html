@@ -3,20 +3,21 @@
         <span class="title1">PISTE</span><br>
         <span class="subtitle">Paroles, Interprètes et Sons : le Test d'Ecoute !</span><br>
         <span *ngIf="userinfo">Connecté à Spotify en tant que <strong>{{userinfo.display_name}}</strong>  <button (click)="logoutClick()">Deconnexion</button></span>
-        <span *ngIf="!userinfo">Pas encore connecté à Spotify  <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button></span>
+        <span *ngIf="!userinfo && !freestyle">Pas encore connecté à Spotify  <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button></span>
     </div>
 </header>
 
 <div class="controls border">
-    <mat-form-field class="playlist-input">
+    <mat-form-field *ngIf="!freestyle" class="playlist-input">
         <mat-label>URL Spotify de la playlist</mat-label>
         <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
         <mat-hint class="mat-error" *ngIf="inputPlayListErrorMessage">{{inputPlayListErrorMessage}}</mat-hint>
     </mat-form-field>
-    <div class="playlist-title">{{playlistTitle}}</div>
-    <hr class="title-separator">
+    <div *ngIf="!freestyle" class="playlist-title">{{playlistTitle}}</div>
+    <hr *ngIf="!freestyle" class="title-separator">
     <div class="preferences-input">
-        <mat-slide-toggle class="preference-input" [(ngModel)]="preference.shuffle" (ngModelChange)="onChangeShuffle($event)">Lecture Aléatoire</mat-slide-toggle>
+        <mat-slide-toggle class="preference-input" [(ngModel)]="freestyle" (ngModelChange)="onChangeBlingTestMode($event)">Freestyle</mat-slide-toggle>
+        <mat-slide-toggle class="preference-input" *ngIf="!freestyle" [(ngModel)]="preference.shuffle" (ngModelChange)="onChangeShuffle($event)">Lecture Aléatoire</mat-slide-toggle>
         <mat-slide-toggle class="preference-input" [(ngModel)]="preference.playSounds" (ngModelChange)="onChangePlaySound($event)">Annoncer le joueur qui a buzzé</mat-slide-toggle>
         <mat-slider class="preference-input" [max]="8" [min]="0" [step]="1" [discrete]="true" [showTickMarks]="false">Temps pour répondre : {{preference.expirationTime==0 ? "beaucoup": preference.expirationTime+" sec"}}<input matSliderThumb [(ngModel)]="preference.expirationTime"></mat-slider>
         <button (click)="razScores()">RAZ les scores</button>
@@ -32,7 +33,7 @@
         <div class="bar"  *ngFor="let i of [].constructor(20)"></div>
     </div>
 </div>
-<div *ngIf="showTrackState=='READY_TO_START' && playlistTitle" class="playlist-introduction">OK, donc on joue sur <span style="font-style: italic;">{{playlistTitle}}</span><br>Pret à buzzer ? <br><span style="border: solid 1px;">Entrée↵</span> pour commencer</div>
+<div *ngIf="showTrackState=='READY_TO_START' && playlistTitle && !freestyle" class="playlist-introduction">OK, donc on joue sur <span style="font-style: italic;">{{playlistTitle}}</span><br>Pret à buzzer ? <br><span style="border: solid 1px;">Entrée↵</span> pour commencer</div>
 
 <div class="players" *ngIf="gameState">
     <div class="player border" *ngFor="let player of gameState.players | keyvalue" [ngClass]="{'speaking-player': player.value.buzzer=='speaking', 'expired-player': player.value.buzzer=='expired'}">
@@ -43,7 +44,8 @@
                 </mat-select>
             </mat-form-field>
         </div>
-        <div class="player-score player-section pointer" (click)="incrementScore(player.value.index)">{{player.value.score}}</div>
+        <div class="player-score player-section pointer" (click)="incrementScore(player.value.index)" [ngClass]="{'negative-change': player.value.recentChangeinScore<0,'positive-change': player.value.recentChangeinScore>0}">{{player.value.score}}
+            <span class="score-delta" [ngClass]="{'display-none': player.value.recentChangeinScore==0}">({{player.value.recentChangeinScore>0 ? '+' : ''}}{{player.value.recentChangeinScore}})</span></div>
         <div class="player-controls player-section">
             <div class="player-hotkey">
                 <mat-form-field appearance="outline" class="invisible-select">
@@ -57,10 +59,10 @@
             <div class="player-remove"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Delete Player" fontIcon="delete_forever" (click)="removePlayer(player.value.index)"></mat-icon></div>
         </div>
     </div>
-    <div *ngIf="gameState.players.size < 8 && userinfo" class="player border add-player" (click)="addPlayerClick()">
+    <div *ngIf="gameState.players.size < 8 && (userinfo || freestyle)" class="player border add-player" (click)="addPlayerClick()">
         <mat-icon class="add-icon" aria-hidden="false" aria-label="Add Player" fontIcon="add_circle"></mat-icon>
     </div>
-    <div *ngIf="!userinfo" class="player border add-player" (click)="spotifyAuthorizationClick()">
+    <div *ngIf="!userinfo && !freestyle" class="player border add-player" (click)="spotifyAuthorizationClick()">
         Connecter un compte Spotify pour jouer
     </div>
 </div>

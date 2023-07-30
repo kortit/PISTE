@@ -74,6 +74,20 @@
             flex-grow: 6;
             border-bottom: solid 1px #ffe877;
             font-size: 4.5em;
+            position: relative;
+        }
+        .score-delta{
+            margin-left: 0.2em;
+            position: absolute;
+            top: 45px;
+            right: 48px;
+            font-size: 60%;
+        }
+        .positive-change{
+            color: green;
+        }
+        .negative-change{
+            color: red;
         }
         .player-controls{
             flex-grow: 2;

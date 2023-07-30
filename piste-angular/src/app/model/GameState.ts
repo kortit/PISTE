@@ -5,7 +5,8 @@ export class PlayerState{
     sounds: string[] = [];
     hotkeys: string[] = [];
     buzzer: "inactive" | "speaking" | "expired" = "inactive"; // inactive, speaking, expired
-
+    recentChangeinScore= 0;
+    recentChangeTimeout: NodeJS.Timeout | undefined;
 }
 
 export class GameState {

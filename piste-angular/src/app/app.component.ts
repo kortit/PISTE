@@ -19,6 +19,7 @@ export class AppComponent implements OnInit{
     private preferenceService: PreferenceService, private gameService: GameService, private winRef: WindowRef, private changeDetectorRef: ChangeDetectorRef){}
 
   preference: Preference = new Preference();
+  freestyle = false;
 
   userinfo: SpotifyApi.CurrentUsersProfileResponse | undefined;
 
@@ -49,10 +50,16 @@ export class AppComponent implements OnInit{
 
   selectPlayerOptions: Map<string, boolean> = new Map();
   selectHotkeysOptions: Map<string, boolean> = new Map();
+  lastPlayerToBuzz = -1;
 
   ngOnInit(): void {
 
-    this.spotifyService.getMe().subscribe(userInfo => this.userinfo = userInfo);
+    this.spotifyAuthorization.onLoginCallback( () => this.spotifyService.getMe().subscribe(userInfo => this.userinfo = userInfo));
+    this.spotifyAuthorization.tryCodeExchange();
+
+    if(this.spotifyAuthorization.isLoggedIn()){
+      this.spotifyService.getMe().subscribe(userInfo => this.userinfo = userInfo);
+    }
 
     this.preferenceService.preference.subscribe(preference => this.preference = preference);
 
@@ -106,7 +113,7 @@ export class AppComponent implements OnInit{
     let playerBuzzer = this.gameState?.hotkeys.get(event.key?.toLocaleLowerCase());
     let blockedbefore = this.blocked;
     this.blocked = true;
-    if(playerBuzzer && !blockedbefore && this.playing){
+    if(playerBuzzer && !blockedbefore && (this.playing || this.freestyle)){
       // player buzzed
       if(this.playing){
         this.EmbedController.togglePlay();
@@ -117,7 +124,7 @@ export class AppComponent implements OnInit{
         if(this.preference.playSounds){
           this.playSound(player.sounds[Math.floor(Math.random()*player.sounds.length)])
         }        
-        
+        this.lastPlayerToBuzz = playerBuzzer;
       }
       if(this.expirationTimeout){
         clearTimeout(this.expirationTimeout);
@@ -143,6 +150,12 @@ export class AppComponent implements OnInit{
           this.blocked = false;
           break;
       case "enter":  
+          if(this.freestyle){
+            event.preventDefault();
+            this.deactivateAllPlayers();
+            this.blocked = false;
+            break;
+          }
           if(this.showTrackState=="PLAYING"){
             // cas 1 : ça jouait et on affiche la réponse
             this.showTrackState = "ANSWER";
@@ -159,6 +172,20 @@ export class AppComponent implements OnInit{
             this.refreshPlayerWithCurrentTrack();
           }
           event.preventDefault();          
+          break;
+      case "delete":
+      case "del":
+      case "supr":
+      case "backspace":
+      case "-":
+        if(this.lastPlayerToBuzz>=0){
+          this.gameService.incrementScore(this.lastPlayerToBuzz, -1);
+        }        
+        break;
+      case "+":
+          if(this.lastPlayerToBuzz>=0){
+            this.gameService.incrementScore(this.lastPlayerToBuzz);
+          }        
           break;
       case "1":
       case "2":
@@ -210,6 +237,9 @@ export class AppComponent implements OnInit{
   }
   onChangeShuffle(event: boolean): void {
     this.preferenceService.patchPreference({"shuffle": event});
+  }
+  onChangeBlingTestMode(event: boolean): void {
+    
   }
 
   onPlaylistInput(playlistRef: string): void {

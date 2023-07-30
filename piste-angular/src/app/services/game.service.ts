@@ -16,7 +16,7 @@ export const PLAYER_SOUNDS: Map<string, string[]> =
   ]);
 
 
-export const HOTKEYS: string[] = ["a","z","e","r","t","y","u","i","o","p",
+export const HOTKEYS: string[] = ["z","a","e","r","t","y","u","i","o","p",
                                   "q","s","d","f","g","h","j","k","l","m",
                                   "w","x","c","v","b","n"];
 
@@ -108,8 +108,28 @@ export class GameService {
     let player = gameState.players.get(playerIndex);
     if(player){
       player.score += increment;
+      player.recentChangeinScore += increment;
+      if(player.recentChangeTimeout){
+        clearTimeout(player.recentChangeTimeout);
+      }
+      player.recentChangeTimeout = setTimeout(() => {
+        this.resetRecentChanges(playerIndex);
+      }, 4000);
     }
     this.gameState.next(gameState);
+  }
+
+  resetRecentChanges(playerIndex: number){
+    let gameState = this.gameState.value;
+    let player = gameState.players.get(playerIndex);
+    if(player){
+      player.recentChangeinScore = 0;
+      if(player.recentChangeTimeout){
+        clearTimeout(player.recentChangeTimeout);
+        player.recentChangeTimeout = undefined;
+      }
+    }
+    this.gameState.next(gameState);    
   }
 
   razScores(){
