@@ -44,4 +44,9 @@ export class SpotifyService {
     return from(this.spotify.getPlaylist(id));
   }
 
+  public transferPlayback(deviceId: string): Observable<void>{
+    this.spotify.setAccessToken(this.spotifyAuthorization.getAccessToken());
+    return from(this.spotify.transferMyPlayback([deviceId]));
+  }
+
 }

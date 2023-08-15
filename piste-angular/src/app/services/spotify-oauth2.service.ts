@@ -11,7 +11,7 @@ const authCodeFlowConfig: AuthConfig = {
       redirectUri: window.location.origin,
       clientId: 'a390827581254150accfba45ba921e39',
       responseType: 'code',
-      scope: '',
+      scope: 'streaming user-read-email user-read-private',
       showDebugInformation: true      
 };
 

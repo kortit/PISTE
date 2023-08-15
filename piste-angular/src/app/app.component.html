@@ -3,21 +3,28 @@
         <span class="title1">PISTE</span><br>
         <span class="subtitle">Paroles, Interprètes et Sons : le Test d'Ecoute !</span><br>
         <span *ngIf="userinfo">Connecté à Spotify en tant que <strong>{{userinfo.display_name}}</strong>  <button (click)="logoutClick()">Deconnexion</button></span>
-        <span *ngIf="!userinfo && !freestyle">Pas encore connecté à Spotify  <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button></span>
+        <span *ngIf="!userinfo && playMode!='FREESTYLE'">Pas encore connecté à Spotify  <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button></span>
     </div>
 </header>
 
 <div class="controls border">
-    <mat-form-field *ngIf="!freestyle" class="playlist-input">
+    <mat-form-field *ngIf="playMode=='NAVIGATEUR'" class="playlist-input">
         <mat-label>URL Spotify de la playlist</mat-label>
         <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
         <mat-hint class="mat-error" *ngIf="inputPlayListErrorMessage">{{inputPlayListErrorMessage}}</mat-hint>
     </mat-form-field>
-    <div *ngIf="!freestyle" class="playlist-title">{{playlistTitle}}</div>
-    <hr *ngIf="!freestyle" class="title-separator">
+    <div *ngIf="playMode=='NAVIGATEUR'" class="playlist-title">{{playlistTitle}}</div>
+    <hr *ngIf="playMode=='NAVIGATEUR'" class="title-separator">
     <div class="preferences-input">
-        <mat-slide-toggle class="preference-input" [(ngModel)]="freestyle" (ngModelChange)="onChangeBlingTestMode($event)">Freestyle</mat-slide-toggle>
-        <mat-slide-toggle class="preference-input" *ngIf="!freestyle" [(ngModel)]="preference.shuffle" (ngModelChange)="onChangeShuffle($event)">Lecture Aléatoire</mat-slide-toggle>
+        <mat-form-field class="preference-input">
+            <mat-label>Mode de Jeu</mat-label>
+            <mat-select [(ngModel)]="playMode">
+                <mat-option [value]="'FREESTYLE'">FREESTYLE</mat-option>
+                <mat-option [value]="'NAVIGATEUR'">NAVIGATEUR</mat-option>
+                <mat-option [value]="'SPOTIFY'">SPOTIFY</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-slide-toggle class="preference-input" *ngIf="playMode=='NAVIGATEUR'" [(ngModel)]="preference.shuffle" (ngModelChange)="onChangeShuffle($event)">Lecture Aléatoire</mat-slide-toggle>
         <mat-slide-toggle class="preference-input" [(ngModel)]="preference.playSounds" (ngModelChange)="onChangePlaySound($event)">Annoncer le joueur qui a buzzé</mat-slide-toggle>
         <mat-slider class="preference-input" [max]="8" [min]="0" [step]="1" [discrete]="true" [showTickMarks]="false">Temps pour répondre : {{preference.expirationTime==0 ? "beaucoup": preference.expirationTime+" sec"}}<input matSliderThumb [(ngModel)]="preference.expirationTime"></mat-slider>
         <button (click)="razScores()">RAZ les scores</button>
@@ -33,7 +40,7 @@
         <div class="bar"  *ngFor="let i of [].constructor(20)"></div>
     </div>
 </div>
-<div *ngIf="showTrackState=='READY_TO_START' && playlistTitle && !freestyle" class="playlist-introduction">OK, donc on joue sur <span style="font-style: italic;">{{playlistTitle}}</span><br>Pret à buzzer ? <br><span style="border: solid 1px;">Entrée↵</span> pour commencer</div>
+<div *ngIf="showTrackState=='READY_TO_START' && playlistTitle && playMode!='FREESTYLE'" class="playlist-introduction">OK, donc on joue sur <span style="font-style: italic;">{{playlistTitle}}</span><br>Pret à buzzer ? <br><span style="border: solid 1px;">Entrée↵</span> pour commencer</div>
 
 <div class="players" *ngIf="gameState">
     <div class="player border" *ngFor="let player of gameState.players | keyvalue" [ngClass]="{'speaking-player': player.value.buzzer=='speaking', 'expired-player': player.value.buzzer=='expired'}">
@@ -59,10 +66,10 @@
             <div class="player-remove"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Delete Player" fontIcon="delete_forever" (click)="removePlayer(player.value.index)"></mat-icon></div>
         </div>
     </div>
-    <div *ngIf="gameState.players.size < 8 && (userinfo || freestyle)" class="player border add-player" (click)="addPlayerClick()">
+    <div *ngIf="gameState.players.size < 8 && (userinfo || playMode=='FREESTYLE')" class="player border add-player" (click)="addPlayerClick()">
         <mat-icon class="add-icon" aria-hidden="false" aria-label="Add Player" fontIcon="add_circle"></mat-icon>
     </div>
-    <div *ngIf="!userinfo && !freestyle" class="player border add-player" (click)="spotifyAuthorizationClick()">
+    <div *ngIf="!userinfo && playMode!='FREESTYLE'" class="player border add-player" (click)="spotifyAuthorizationClick()">
         Connecter un compte Spotify pour jouer
     </div>
 </div>
