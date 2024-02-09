@@ -1,14 +1,15 @@
 {
   "name": "piste",
   "version": "1.0",
-  "main": "main.js",
+  "main": "main.mjs",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "electron": "electron ."
+    "electron": "electron .",
+    "installRuntimeDeps": "cd dist & npm init -y & npm install express electron"
   },
   "private": true,
   "dependencies": {
@@ -24,6 +25,8 @@
     "@angular/router": "^15.0.0",
     "@types/spotify-web-playback-sdk": "^0.1.15",
     "angular-oauth2-oidc": "^15.0.1",
+    "express": "^4.18.2",
+    "get-port": "^7.0.0",
     "rxjs": "~7.5.0",
     "spotify-web-api-js": "^1.5.2",
     "tslib": "^2.3.0",

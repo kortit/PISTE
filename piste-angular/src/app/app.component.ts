@@ -8,6 +8,7 @@ import { PreferenceService } from './services/preference.service';
 import { SpotifyOauth2Service } from './services/spotify-oauth2.service';
 import { SpotifyService } from './services/spotify.service';
 import { WindowRef } from './WindowRef';
+import { version } from 'src/version';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ export class AppComponent implements OnInit{
   constructor(private spotifyService: SpotifyService, private spotifyAuthorization: SpotifyOauth2Service,
     private preferenceService: PreferenceService, private gameService: GameService, private winRef: WindowRef, private changeDetectorRef: ChangeDetectorRef){}
 
+  version = version;
   preference: Preference = new Preference();
   playMode: "SPOTIFY" | "FREESTYLE" | "NAVIGATEUR" = "SPOTIFY";
 
@@ -89,6 +91,11 @@ export class AppComponent implements OnInit{
         this.EmbedController.loadUri(current_track.uri);
       });
       this.player.connect();
+
+      // DEV init
+      this.playMode = "NAVIGATEUR";
+      this.playlistRef="https://open.spotify.com/playlist/37i9dQZF1DX0zyaFj8e28t";
+      this.onPlaylistInput("https://open.spotify.com/playlist/37i9dQZF1DX0zyaFj8e28t");
   }
 
     this.winRef.nativeWindow.onSpotifyIframeApiReady = (IFrameAPI: any) => {

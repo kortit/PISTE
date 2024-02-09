@@ -1,20 +1,29 @@
 # Setup
 
 ## Requirement : node and npm installed on system
+## Optional but nice : git bash, 7zip
 
 ## download npm packages
-npm install
+`npm install`
 
 ## If not already installed, install angular CLI
-npm install -g @angular/cli
+`npm install -g @angular/cli`
 
 ## To package app to .exe, If not already installed, install electron-packager
-npm install electron-packager -g
+`npm install -g electron-packager`
 
 ## Run local server
-ng serve
+`ng serve`
 
-## Build and package app as .exe
-ng build --base-href ./
-electron-packager . --platform=win32 --arch=x64
+# Packaging and distribution for windows from windows
 
+## Build the .exe
+`ng build --base-href ./`<br>
+`electron-packager . piste --platform=win32 --arch=x64 --icon=src/favicon.ico --overwrite`
+
+## package portable distribution
+`mv piste-win32-x64 piste`<br>
+`7z a piste-portable-1.0.zip piste`
+
+## To create a windows installer file, download InnoSetup, open the piste.iss file with InnoSetup, edit version number if required and compile. installer file is in InnoSetupOutput
+Or from command line : `"C:/Program Files (x86)/Inno Setup 6/ISCC.exe" piste.iss`
