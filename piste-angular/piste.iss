@@ -1,4 +1,4 @@
-#define MyAppVersion "1.0.5"
+#define MyAppVersion "2.0.3"
 
 [Setup]
 AppName=PISTE
@@ -8,8 +8,8 @@ OutputDir=InnoSetupOutput
 OutputBaseFilename=piste-installer-{#MyAppVersion}
 
 [Files]
-Source: "piste-win32-x64\*"; DestDir: "{app}"; Flags: recursesubdirs
+Source: "piste\*"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
-Name: "{commonprograms}\PISTE"; Filename: "{app}\piste.exe"; WorkingDir: "{app}"
-Name: "{commondesktop}\PISTE"; Filename: "{app}\piste.exe"; WorkingDir: "{app}"
+Name: "{commonprograms}\PISTE"; Filename: "{app}\piste.exe"; WorkingDir: "{app}"; IconFilename: "{app}\favicon.ico"
+Name: "{commondesktop}\PISTE"; Filename: "{app}\piste.exe"; WorkingDir: "{app}"; IconFilename: "{app}\favicon.ico"

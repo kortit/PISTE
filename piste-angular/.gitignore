@@ -42,7 +42,8 @@ testem.log
 Thumbs.db
 
 # packaging
-/piste-win32-x64
-/InnoSetupOutput
+piste.exe
 piste-portable-*.zip
 /piste
+/runtime_deps/node_modules
+/InnoSetupOutput
