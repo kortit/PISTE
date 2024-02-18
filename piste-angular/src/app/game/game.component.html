@@ -1,0 +1,77 @@
+<div *ngIf="devMode">playing={{playing}}, playMode={{playMode}}</div>
+<router-outlet></router-outlet>
+<header>
+    <div class="title border">
+        <span class="title1" [title]="'PISTE v'+version">PISTE</span><br>
+        <span class="subtitle">Paroles, Interprètes et Sons : le Test d'Ecoute !</span><br>
+        <span *ngIf="userinfo">Connecté à Spotify en tant que <strong>{{userinfo.display_name}}</strong>  <button (click)="logoutClick()">Deconnexion</button></span>
+        <span *ngIf="!userinfo && playMode!='FREESTYLE'">Pas encore connecté à Spotify  <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button></span>
+    </div>
+</header>
+
+<div class="controls border">
+    <mat-form-field *ngIf="playMode=='NAVIGATEUR'" class="playlist-input">
+        <mat-label>URL Spotify de la playlist</mat-label>
+        <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
+        <mat-hint class="mat-error" *ngIf="inputPlayListErrorMessage">{{inputPlayListErrorMessage}}</mat-hint>
+    </mat-form-field>
+    <div *ngIf="playMode=='NAVIGATEUR'" class="playlist-title">{{playlistTitle}}</div>
+    <hr *ngIf="playMode=='NAVIGATEUR'" class="title-separator">
+    <div class="preferences-input">
+        <mat-form-field class="preference-input">
+            <mat-label>Mode de Jeu</mat-label>
+            <mat-select [(ngModel)]="playMode" (ngModelChange)="onModeChange($event)">
+                <mat-option [value]="'FREESTYLE'">FREESTYLE</mat-option>
+                <mat-option [value]="'NAVIGATEUR'">NAVIGATEUR</mat-option>
+                <mat-option [value]="'SPOTIFY'">SPOTIFY</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-slide-toggle class="preference-input" *ngIf="playMode=='NAVIGATEUR'" [(ngModel)]="preference.shuffle" (ngModelChange)="onChangeShuffle($event)">Lecture Aléatoire</mat-slide-toggle>
+        <mat-slide-toggle class="preference-input" [(ngModel)]="preference.playSounds" (ngModelChange)="onChangePlaySound($event)">Annoncer le joueur qui a buzzé</mat-slide-toggle>
+        <mat-slider class="preference-input" [max]="8" [min]="0" [step]="1" [discrete]="true" [showTickMarks]="false">Temps pour répondre : {{preference.expirationTime==0 ? "beaucoup": preference.expirationTime+" sec"}}<input matSliderThumb [(ngModel)]="preference.expirationTime"></mat-slider>
+        <button (click)="razScores()">RAZ les scores</button>
+    </div>    
+</div>
+
+<div [ngClass]="{'hidden': showTrackState!='ANSWER'}"><div id="spotify-iframe"></div></div>
+<div [ngClass]="{'display-none': showTrackState!='PLAYING'}" class="bars-container">
+    <div class="bars bars-active" *ngIf="playing">
+        <div class="bar" *ngFor="let i of [].constructor(20)"></div>
+    </div>
+    <div class="bars bars-inactive" *ngIf="!playing">
+        <div class="bar"  *ngFor="let i of [].constructor(20)"></div>
+    </div>
+</div>
+<div *ngIf="showTrackState=='READY_TO_START' && playlistTitle && playMode!='FREESTYLE'" class="playlist-introduction">OK, donc on joue sur <span style="font-style: italic;">{{playlistTitle}}</span><br>Pret à buzzer ? <br><span style="border: solid 1px;">Entrée↵</span> pour commencer</div>
+
+<div class="players" *ngIf="gameState">
+    <div class="player border" *ngFor="let player of gameState.players | keyvalue" [ngClass]="{'speaking-player': player.value.buzzer=='speaking', 'expired-player': player.value.buzzer=='expired'}">
+        <div class="player-name player-section">
+            <mat-form-field appearance="outline" class="invisible-select">
+                <mat-select #playerInput [(ngModel)]="player.value.name" (ngModelChange)="onPlayerNameSelected($event, player.value.index); playerInput.close()">
+                  <mat-option class="option" *ngFor="let playerOption of selectPlayerOptions.keys()" [value]="playerOption" [disabled]="!selectPlayerOptions.get(playerOption)">{{playerOption}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <div class="player-score player-section pointer" (click)="incrementScore(player.value.index)" [ngClass]="{'negative-change': player.value.recentChangeinScore<0,'positive-change': player.value.recentChangeinScore>0}">{{player.value.score}}
+            <span class="score-delta" [ngClass]="{'display-none': player.value.recentChangeinScore==0}">({{player.value.recentChangeinScore>0 ? '+' : ''}}{{player.value.recentChangeinScore}})</span></div>
+        <div class="player-controls player-section">
+            <div class="player-hotkey">
+                <mat-form-field appearance="outline" class="invisible-select">
+                    <mat-select multiple [(ngModel)]="player.value.hotkeys" (ngModelChange)="onPlayerHotkeysSelected($event, player.value.index)">
+                      <mat-option class="option" *ngFor="let hotkeysOption of selectHotkeysOptions.keys()" [value]="hotkeysOption" [disabled]="!selectHotkeysOptions.get(hotkeysOption) && !player.value.hotkeys.includes(hotkeysOption)">{{hotkeysOption.toUpperCase()}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="player-decrement"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Add Player" fontIcon="arrow_drop_down_circle" (click)="decrementScore(player.value.index)"></mat-icon></div>
+            <div class="player-release" *ngIf="player.value.buzzer!='inactive'"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Release Player" fontIcon="play_arrow" (click)="deactivateAllPlayers()"></mat-icon></div>
+            <div class="player-remove"><mat-icon class="add-icon pointer" aria-hidden="false" aria-label="Delete Player" fontIcon="delete_forever" (click)="removePlayer(player.value.index)"></mat-icon></div>
+        </div>
+    </div>
+    <div *ngIf="gameState.players.size < 8 && (userinfo || playMode=='FREESTYLE')" class="player border add-player" (click)="addPlayerClick()">
+        <mat-icon class="add-icon" aria-hidden="false" aria-label="Add Player" fontIcon="add_circle"></mat-icon>
+    </div>
+    <div *ngIf="!userinfo && playMode!='FREESTYLE'" class="player border add-player" (click)="spotifyAuthorizationClick()">
+        Connecter un compte Spotify pour jouer
+    </div>
+</div>

@@ -18,12 +18,13 @@
 # Packaging and distribution for windows from windows
 
 ## Build the .exe
-`ng build --base-href ./`<br>
-`electron-packager . piste --platform=win32 --arch=x64 --icon=src/favicon.ico --overwrite`
+`ng build`<br>
+`electron-packager . piste --platform=win32 --arch=x64 --icon=src/favicon.ico --ignore=InnoSetupOutput --ignore=.angular --ignore=.vscode --ignore=piste-portable --overwrite`
 
 ## package portable distribution
-`mv piste-win32-x64 piste`<br>
+`cp -r piste-win32-x64 piste`<br>
 `7z a piste-portable-1.0.zip piste`
 
 ## To create a windows installer file, download InnoSetup, open the piste.iss file with InnoSetup, edit version number if required and compile. installer file is in InnoSetupOutput
 Or from command line : `"C:/Program Files (x86)/Inno Setup 6/ISCC.exe" piste.iss`
+

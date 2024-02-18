@@ -1,6 +1,6 @@
 {
   "name": "piste",
-  "version": "1.0",
+  "version": "1.1.0",
   "main": "main.mjs",
   "scripts": {
     "ng": "ng",
@@ -9,7 +9,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "electron": "electron .",
-    "installRuntimeDeps": "cd dist & npm init -y & npm install express electron"
+    "postinstall": "electron-builder install-app-deps",
+    "ng:build": "ng build",
+    "electron:build": "electron-builder"
   },
   "private": true,
   "dependencies": {
@@ -26,10 +28,11 @@
     "@types/spotify-web-playback-sdk": "^0.1.15",
     "angular-oauth2-oidc": "^15.0.1",
     "express": "^4.18.2",
+    "extract-zip": "^2.0.1",
     "get-port": "^7.0.0",
     "rxjs": "~7.5.0",
     "spotify-web-api-js": "^1.5.2",
-    "tslib": "^2.3.0",
+    "tslib": "^2.6.2",
     "zone.js": "~0.12.0"
   },
   "devDependencies": {
@@ -37,7 +40,8 @@
     "@angular/cli": "~15.0.5",
     "@angular/compiler-cli": "^15.0.0",
     "@types/jasmine": "~4.3.0",
-    "electron": "^28.2.1",
+    "electron": "github:castlabs/electron-releases#v28.2.3+wvcus",
+    "electron-builder": "^24.9.1",
     "jasmine-core": "~4.5.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.1.0",
@@ -45,5 +49,23 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
     "typescript": "~4.8.2"
+  },
+  "build": {
+    "appId": "kirtot.piste",
+    "productName": "piste",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "main.mjs",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "electron-icon.png"
+    },
+    "electronDist": "node_modules/electron/dist"
   }
 }

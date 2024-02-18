@@ -16,13 +16,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
+import { GameComponent } from './game/game.component';
+import { RouteReuseStrategy } from '@angular/router';
+import { NoReuseStrategy } from './routeReuseStrategy';
 
 @NgModule({
   declarations: [
     AppComponent,
     PlayingComponent,
     ControlsComponent,
-    PlayerComponent
+    PlayerComponent,
+    GameComponent
   ],
   imports: [
     BrowserModule,
@@ -38,7 +42,7 @@ import { MatSelectModule } from '@angular/material/select';
     MatSelectModule,
     FormsModule
   ],
-  providers: [WindowRef],
+  providers: [WindowRef, { provide: RouteReuseStrategy, useClass: NoReuseStrategy }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

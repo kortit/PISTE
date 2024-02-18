@@ -23,11 +23,13 @@ export class SpotifyOauth2Service {
   constructor(private oauthService: OAuthService) { }
 
   startAuthorizationFlow(){
+    console.log(authCodeFlowConfig);
     this.oauthService.configure(authCodeFlowConfig);
     this.oauthService.initCodeFlow();
   }
 
   tryCodeExchange(){
+    console.log(authCodeFlowConfig);
     this.oauthService.configure(authCodeFlowConfig);
     this.oauthService.tryLogin();
     this.oauthService.setupAutomaticSilentRefresh();
