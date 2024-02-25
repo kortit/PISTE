@@ -26,19 +26,21 @@
 </div>
 
 <div class="music-player">
-<div *ngIf="showAnswer" class="album-cover">
-    <img *ngIf="albumCover" [src]="albumCover" alt="Album cover">
-</div>
-<div *ngIf="showAnswer" class="song-info">
-    <div class="song-title">{{answerTitle}}</div>
-    <div class="song-artist">{{answerArtists}}</div>   
-</div>
-<div [ngClass]="{'display-none': showAnswer}" class="bars-container">
-    <div class="bars bars-active" *ngIf="isPlaying">
-        <div class="bar" *ngFor="let i of [].constructor(20)"></div>
+<div class="player-illustration">
+    <div *ngIf="showAnswer" class="album-cover">
+        <img *ngIf="albumCover" [src]="albumCover" alt="Album cover">
     </div>
-    <div class="bars bars-inactive" *ngIf="!isPlaying">
-        <div class="bar"  *ngFor="let i of [].constructor(20)"></div>
+    <div *ngIf="showAnswer" class="song-info">
+        <div class="song-title">{{answerTitle}}</div>
+        <div class="song-artist">{{answerArtists}}</div>   
+    </div>
+    <div [ngClass]="{'display-none': showAnswer}" class="bars-container">
+        <div class="bars bars-active" *ngIf="isPlaying">
+            <div class="bar" *ngFor="let i of [].constructor(20)"></div>
+        </div>
+        <div class="bars bars-inactive" *ngIf="!isPlaying">
+            <div class="bar"  *ngFor="let i of [].constructor(20)"></div>
+        </div>
     </div>
 </div>
 <div class="controls">
