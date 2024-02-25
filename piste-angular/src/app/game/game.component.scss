@@ -1,19 +1,4 @@
-.title{
-    margin: 10px 0;
-    text-align: center;
-    padding: 8px;
-    button{
-        margin: auto 1em;
-    }
-}
-.title1{
-    font-size: 2.5em;
-    letter-spacing: 8px;
-}
-.subtitle{
-    font-style: italic;
-    font-size: 1.2em;
-}
+
 .controls{
     margin: 10px 0;
     text-align: center;
@@ -144,60 +129,6 @@
     .add-icon{
         transition: transform 330ms ease-in-out;
         transform: scale(8);
-    }
-}
-.bars-container{
-    height: 383px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-}
-.bars {
-    height: 152px;
-    width: 500px;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    .bar {
-        background: #ffe877;
-        height: 30px;
-        width: 30px;
-        margin: 0 2px;            
-     }
-    .bar:nth-child(1)  { animation-duration: 474ms; }
-    .bar:nth-child(2)  { animation-duration: 433ms; }
-    .bar:nth-child(3)  { animation-duration: 407ms; }
-    .bar:nth-child(4)  { animation-duration: 458ms; }
-    .bar:nth-child(5)  { animation-duration: 400ms; }
-    .bar:nth-child(6)  { animation-duration: 427ms; }
-    .bar:nth-child(7)  { animation-duration: 441ms; }
-    .bar:nth-child(8)  { animation-duration: 419ms; }
-    .bar:nth-child(9)  { animation-duration: 487ms; }
-    .bar:nth-child(10) { animation-duration: 442ms; }
-    .bar:nth-child(11) { animation-duration: 474ms; }
-    .bar:nth-child(12) { animation-duration: 434ms; }
-    .bar:nth-child(13) { animation-duration: 408ms; }
-    .bar:nth-child(14) { animation-duration: 458ms; }
-    .bar:nth-child(15) { animation-duration: 406ms; }
-    .bar:nth-child(16) { animation-duration: 428ms; }
-    .bar:nth-child(17) { animation-duration: 440ms; }
-    .bar:nth-child(18) { animation-duration: 418ms; }
-    .bar:nth-child(19) { animation-duration: 486ms; }
-    .bar:nth-child(20) { animation-duration: 440ms; }
-}
-.bars-active .bar{
-    animation: soundbars 0ms -800ms linear infinite alternate;  
-    height: 10px;
-}
-
-@keyframes soundbars {
-    0% {
-       opacity: .35;
-       height: 10px; 
-    }
-    100% {
-        opacity: 1;       
-        height: 150px;        
     }
 }
 

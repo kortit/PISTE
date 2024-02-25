@@ -1,11 +1,12 @@
 <div *ngIf="devMode">playing={{playing}}, playMode={{playMode}}</div>
-<router-outlet></router-outlet>
+
 <header>
     <div class="title border">
         <span class="title1" [title]="'PISTE v'+version">PISTE</span><br>
         <span class="subtitle">Paroles, Interprètes et Sons : le Test d'Ecoute !</span><br>
         <span *ngIf="userinfo">Connecté à Spotify en tant que <strong>{{userinfo.display_name}}</strong>  <button (click)="logoutClick()">Deconnexion</button></span>
         <span *ngIf="!userinfo && playMode!='FREESTYLE'">Pas encore connecté à Spotify  <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button></span>
+        <button class="float-right" (click)="routeToTrain()">Besoin d'entrainement ? <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 </header>
 
