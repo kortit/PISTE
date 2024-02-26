@@ -20,6 +20,7 @@ import { GameComponent } from './game/game.component';
 import { RouteReuseStrategy } from '@angular/router';
 import { NoReuseStrategy } from './routeReuseStrategy';
 import { CardsComponent } from './cards/cards.component';
+import { TrainComponent } from './train/train.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { CardsComponent } from './cards/cards.component';
     ControlsComponent,
     PlayerComponent,
     GameComponent,
-    CardsComponent
+    CardsComponent,
+    TrainComponent
   ],
   imports: [
     BrowserModule,

@@ -10,6 +10,7 @@ import { SpotifyService } from '../services/spotify.service';
 import { WindowRef } from '../WindowRef';
 import { version } from 'src/version';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SpotifyPlayerSDKService } from '../spotify-player-sdk.service';
 
 @Component({
   selector: 'game-root',
@@ -18,7 +19,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class GameComponent implements OnInit, OnDestroy{
 
-  constructor(private spotifyService: SpotifyService, private spotifyAuthorization: SpotifyOauth2Service,
+  constructor(private spotifyService: SpotifyService, private spotifyPlayerSDKService: SpotifyPlayerSDKService, private spotifyAuthorization: SpotifyOauth2Service,
     private preferenceService: PreferenceService, private gameService: GameService, private winRef: WindowRef, private changeDetectorRef: ChangeDetectorRef,
     private route: ActivatedRoute, private router: Router){}
 
@@ -38,7 +39,6 @@ export class GameComponent implements OnInit, OnDestroy{
   EmbedController: any
   player: Spotify.Player | undefined
   lastKnownPlayerState: Spotify.PlaybackState | null | undefined;
-  currentPlayerTrack: Spotify.Track | undefined 
 
   playlistRef: string = '';
 
@@ -97,39 +97,19 @@ export class GameComponent implements OnInit, OnDestroy{
     }
 
     if (this.playMode == 'SPOTIFY') {
-      this.winRef.nativeWindow.onSpotifyWebPlaybackSDKReady = () => {
-        this.player = new Spotify.Player({
-          name: 'Piste.buzz Player',
-          getOAuthToken: cb => { cb(this.spotifyAuthorization.getAccessToken()); },
-          volume: 0.4
-        });
-
-        this.player.addListener('ready', ({ device_id }) => {
-          this.spotifyService.transferPlayback(device_id);
-        });
-        this.player.addListener('not_ready', ({ device_id }) => console.log('Device ID has gone offline', device_id));
-        this.player.addListener('initialization_error', ({ message }) => console.error(message));
-        this.player.addListener('authentication_error', ({ message }) => console.error(message));
-        this.player.addListener('account_error', ({ message }) => console.error(message));
-        this.player.addListener('player_state_changed', ({ position, duration, track_window: { current_track } }) => {
-          if (this.showTrackState == "READY_TO_START") {
-            this.player?.pause();
-          }
-          if (this.showTrackState == "NOT_LOADED") {
-            this.showTrackState = "READY_TO_START";
-          }
-          this.currentPlayerTrack = current_track;
-          this.player?.getCurrentState().then(state => {
-            console.log(state);
-            this.playlistTitle = state?.context.metadata?.name || "";
-            this.lastKnownPlayerState = state;
-            this.playing = !state?.paused;
-          });
-          this.EmbedController.loadUri(current_track.uri);
-        });
-        this.player.connect();
-
-      }
+      this.spotifyPlayerSDKService.initializePlayer( state => {
+        console.log('Currently Playing', state.track_window.current_track);
+        if (this.showTrackState == "READY_TO_START") {
+          this.spotifyPlayerSDKService.getPlayer()?.pause();
+        }
+        if (this.showTrackState == "NOT_LOADED") {
+          this.showTrackState = "READY_TO_START";
+        }
+        this.playlistTitle = state?.context.metadata?.name || "";
+        this.lastKnownPlayerState = state;
+        this.playing = !state?.paused;
+        this.EmbedController.loadUri(state.track_window.current_track.uri);
+      });
     }
 
     this.winRef.nativeWindow.onSpotifyIframeApiReady = (IFrameAPI: any) => {
@@ -443,6 +423,10 @@ export class GameComponent implements OnInit, OnDestroy{
 
   resetFocus(){
     console.log("test")
+  }
+
+  routeToTrain(){
+    this.router.navigate(['/train']);
   }
 
   private nextTrack(): void{

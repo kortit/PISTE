@@ -1,0 +1,60 @@
+<header>
+    <div class="title border">
+        <span class="title1">PISTE</span><br>
+        <span class="subtitle">Mode Lecture</span><br>
+        <span *ngIf="userinfo">Connecté à Spotify en tant que <strong>{{userinfo.display_name}}</strong>  <button (click)="logoutClick()">Deconnexion</button></span>
+        <span *ngIf="!userinfo">Pas encore connecté à Spotify  <button (click)="spotifyAuthorizationClick()">Connecter un compte Spotify</button></span>
+        <button class="float-right" (click)="routeToGame()">Go jouer <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</header>
+
+<div class="controls border">
+    <div class="preferences-input">
+        <mat-slider class="preference-input" [max]="31" [min]="-1" [step]="1" [discrete]="true" [showTickMarks]="false">
+            <span *ngIf="preference.trainCallAtSec>0 && preference.trainCallAtSec<=30">Annonce du titre au bout de  {{preference.trainCallAtSec}} secondes</span>
+            <span *ngIf="preference.trainCallAtSec==0">Annonce avant la lecture</span>
+            <span *ngIf="preference.trainCallAtSec<0">Pas d'annonce du titre</span>
+            <span *ngIf="preference.trainCallAtSec>30">Annonce à la fin de la lecture</span>
+            <input matSliderThumb [(ngModel)]="preference.trainCallAtSec" (ngModelChange)="onChangeCallAtSec($event)"></mat-slider>
+    </div>
+    <div class="preferences-input">
+        <mat-slider class="preference-input" [max]="60" [min]="0" [step]="1" [discrete]="true" [showTickMarks]="false">
+            <span *ngIf="preference.trainSkipAtSec>0">Durée de lecture par titre de {{preference.trainSkipAtSec}} secondes</span>
+            <span *ngIf="preference.trainSkipAtSec==0">Lecture en entier</span>
+            <input matSliderThumb [(ngModel)]="preference.trainSkipAtSec" (ngModelChange)="onChangeSkipAtSec($event)"></mat-slider>
+    </div>    
+</div>
+
+<div class="music-player">
+<div class="player-illustration">
+    <div *ngIf="showAnswer" class="album-cover">
+        <img *ngIf="albumCover" [src]="albumCover" alt="Album cover">
+    </div>
+    <div *ngIf="showAnswer" class="song-info">
+        <div class="song-title">{{answerTitle}}</div>
+        <div class="song-artist">{{answerArtists}}</div>   
+    </div>
+    <div [ngClass]="{'display-none': showAnswer}" class="bars-container">
+        <div class="bars bars-active" *ngIf="isPlaying">
+            <div class="bar" *ngFor="let i of [].constructor(20)"></div>
+        </div>
+        <div class="bars bars-inactive" *ngIf="!isPlaying">
+            <div class="bar"  *ngFor="let i of [].constructor(20)"></div>
+        </div>
+    </div>
+</div>
+<div class="controls">
+    <button (click)="prevSong()"><i class="fa fa-step-backward"></i></button>
+    <button (click)="togglePlay()">
+    <i *ngIf="isPlaying" class="fa fa-pause"></i>
+    <i *ngIf="!isPlaying" class="fa fa-play"></i>
+    </button>
+    <button (click)="nextSong()"><i class="fa fa-step-forward"></i></button>
+</div>
+<div class="progress-bar" [style.background]="getProgressBarBackground()">
+    <div class="progress" [style.width.%]="100* progressValue / progressMax">
+        <div class="spark"></div>
+    </div>
+</div>
+
+</div>
