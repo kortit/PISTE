@@ -1,0 +1,46 @@
+.card-row {
+    position: relative;
+    display: flex;
+    width: 97%;
+    margin: auto;
+    overflow-x: visible;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    height: 300px;
+    .card {
+        position: absolute;
+        width: 180px;
+        height: 100%;
+        flex-shrink: 0; 
+        img {
+            width: 100%;
+            height: auto;
+        }
+        transition: transform 0.2s ease-in-out;
+        &:hover {
+            transform: scale(1.3) rotate(5deg);
+            z-index: 100;
+        }
+
+       
+    }
+    @for $total from 1 through 20 {
+        @for $index from 0 through $total {
+            .card-#{$index}-over-#{$total} {
+                z-index: $index;
+                left: calc((100% - 180px) * $index / ($total - 1));
+                &.show-top{
+                    transform: scale(3) translate(calc(20px * ($total / 2 - $index )), 60px);
+                    z-index: 100;
+                }
+                &.show-bottom{
+                    transform: scale(3) translate(calc(20px * ($total / 2 - $index )), -20px);
+                    z-index: 100;
+                }
+            }
+
+        }
+    }
+    
+}
+  

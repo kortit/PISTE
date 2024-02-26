@@ -1,4 +1,4 @@
-#define MyAppVersion "2.0.3"
+#define MyAppVersion "2.0.4"
 
 [Setup]
 AppName=PISTE
@@ -6,6 +6,7 @@ AppVersion={#MyAppVersion}
 DefaultDirName={pf}\PISTE
 OutputDir=InnoSetupOutput
 OutputBaseFilename=piste-installer-{#MyAppVersion}
+Compression=zip
 
 [Files]
 Source: "piste\*"; DestDir: "{app}"; Flags: recursesubdirs

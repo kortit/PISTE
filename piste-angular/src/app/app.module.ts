@@ -19,6 +19,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { GameComponent } from './game/game.component';
 import { RouteReuseStrategy } from '@angular/router';
 import { NoReuseStrategy } from './routeReuseStrategy';
+import { CardsComponent } from './cards/cards.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { NoReuseStrategy } from './routeReuseStrategy';
     PlayingComponent,
     ControlsComponent,
     PlayerComponent,
-    GameComponent
+    GameComponent,
+    CardsComponent
   ],
   imports: [
     BrowserModule,

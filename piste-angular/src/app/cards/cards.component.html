@@ -1,0 +1,16 @@
+<div class="card-display">
+    <div class="card-row">
+        <div *ngFor="let url of topRowCards; let i = index" [class]="'card card-' + i + '-over-' + topRowCards.length"
+        (mousedown)="onCardPress($event, 'top-'+i)"
+        [class.show-top]="pressed=='top-'+i">
+          <img [src]="url">
+        </div>
+    </div>
+    <div class="card-row">
+        <div *ngFor="let url of bottomRowCards; let i = index" [class]="'card card-' + i + '-over-' + bottomRowCards.length"
+        (mousedown)="onCardPress($event, 'bottom-'+i)"
+        [class.show-bottom]="pressed=='bottom-'+i">
+          <img [src]="url">
+        </div>
+    </div>
+</div>
