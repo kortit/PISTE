@@ -6,7 +6,7 @@
     overflow-x: visible;
     flex-wrap: nowrap;
     justify-content: space-evenly;
-    height: 300px;
+    height: 251px;
     .card {
         position: absolute;
         width: 180px;
@@ -24,23 +24,123 @@
 
        
     }
-    @for $total from 1 through 20 {
+    @for $total from 3 through 20 {
         @for $index from 0 through $total {
             .card-#{$index}-over-#{$total} {
                 z-index: $index;
                 left: calc((100% - 180px) * $index / ($total - 1));
                 &.show-top{
-                    transform: scale(3) translate(calc(20px * ($total / 2 - $index )), 60px);
+                    transform: scale(2.5) translate(calc(20px * ($total / 2 - $index )), 60px);
+                    z-index: 100;
+                }
+                &.show-middle{
+                    transform: scale(2.5) translate(calc(20px * ($total / 2 - $index )), 20px);
                     z-index: 100;
                 }
                 &.show-bottom{
-                    transform: scale(3) translate(calc(20px * ($total / 2 - $index )), -20px);
+                    transform: scale(2.5) translate(calc(20px * ($total / 2 - $index )), -20px);
                     z-index: 100;
                 }
             }
 
         }
     }
+
+    .card-0-over-2 {
+        z-index: 0;
+        left: calc(40% - 180px);
+        &.show-top{
+            transform: scale(2.5) translate(40px, 60px);
+            z-index: 100;
+        }
+        &.show-middle{
+            transform: scale(2.5) translate(40px, 20px);
+            z-index: 100;
+        }
+        &.show-bottom{
+            transform: scale(2.5) translate(40px, -20px);
+            z-index: 100;
+        }
+    }
+    .card-1-over-2 {
+        z-index: 1;
+        left: 60%;
+        &.show-top{
+            transform: scale(2.5) translate(-40px, 60px);
+            z-index: 100;
+        }
+        &.show-middle{
+            transform: scale(2.5) translate(-40px, 20px);
+            z-index: 100;
+        }
+        &.show-bottom{
+            transform: scale(2.5) translate(-40px, -20px);
+            z-index: 100;
+        }
+    }
+    .card-0-over-1 {
+        z-index: 1;
+        left: 40%;
+        &.show-top{
+            transform: scale(2.5) translate(0, 60px);
+            z-index: 100;
+        }
+        &.show-middle{
+            transform: scale(2.5) translate(0, 20px);
+            z-index: 100;
+        }
+        &.show-bottom{
+            transform: scale(2.5) translate(0, -20px);
+            z-index: 100;
+        }
+    }
     
 }
+
+.winner-pool {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: 
+     linear-gradient(to right, #00ff80 , transparent 2%, transparent 98%, #00ff80),
+     linear-gradient(to bottom, #00ff80 , transparent 3%, transparent 97%, #00ff80);
+    
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 10px;
+    min-width: 70%;
+}
+.winner-pool-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+}
+.swap-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 15px 10px;
+    button {
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      font-size: 1.3em;
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      &:first-child {
+        margin-right: 10px;
+      }
+
+      &:last-child {
+        margin-left: 10px;
+      }
+      i{
+        margin-left: 7px;
+      }
+    }
+  }
   

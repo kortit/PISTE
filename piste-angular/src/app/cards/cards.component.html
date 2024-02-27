@@ -6,6 +6,20 @@
           <img [src]="url">
         </div>
     </div>
+    <div class="swap-buttons">
+        <button (click)="incrementSplitIndex()">+Benjam<i class="fa-solid fa-square-caret-up"></i></button>
+        <div class="winner-pool">
+          <div class="winner-pool-title">Winner Pool{{winner ? ' : '+winner : ''}}</div>
+          <div class="card-row">
+            <div *ngFor="let url of winnerPool; let i = index" [class]="'card card-' + i + '-over-' + winnerPool.length"
+            (mousedown)="onCardPress($event, 'middle-'+i)"
+            [class.show-bottom]="pressed=='middle-'+i">
+              <img [src]="url">
+            </div>
+        </div>
+      </div>
+        <button (click)="decrementSplitIndex()">+David<i class="fa-solid fa-square-caret-down"></i></button>
+    </div>
     <div class="card-row">
         <div *ngFor="let url of bottomRowCards; let i = index" [class]="'card card-' + i + '-over-' + bottomRowCards.length"
         (mousedown)="onCardPress($event, 'bottom-'+i)"
