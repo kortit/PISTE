@@ -1,6 +1,6 @@
 {
   "name": "piste",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "main": "main.mjs",
   "scripts": {
     "ng": "ng",

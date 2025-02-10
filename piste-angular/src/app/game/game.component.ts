@@ -29,7 +29,7 @@ export class GameComponent implements OnInit, OnDestroy{
   version = version;
   preference: Preference = new Preference();
   playMode: "SPOTIFY" | "FREESTYLE" | "NAVIGATEUR" = "SPOTIFY";
-
+  includeOnePiece = false;
   userinfo: SpotifyApi.CurrentUsersProfileResponse | undefined;
 
   uri: SpotifyApi.CurrentlyPlayingResponse | undefined;

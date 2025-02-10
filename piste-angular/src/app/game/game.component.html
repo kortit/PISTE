@@ -34,7 +34,7 @@
     </div>    
 </div>
 
-<app-cards></app-cards>
+<app-cards *ngIf="includeOnePiece"></app-cards>
 
 <div [ngClass]="{'hidden': showTrackState!='ANSWER'}"><div id="spotify-iframe"></div></div>
 <div [ngClass]="{'display-none': showTrackState!='PLAYING'}" class="bars-container">
