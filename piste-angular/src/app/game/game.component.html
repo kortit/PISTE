@@ -12,7 +12,7 @@
 
 <div class="controls border">
     <mat-form-field *ngIf="playMode=='NAVIGATEUR'" class="playlist-input">
-        <mat-label>URL Spotify de la playlist</mat-label>
+        <mat-label>URL Spotify de la playlist  -  ! Choisir une playlist dont l'auteur n'est pas "Spotify" !</mat-label>
         <input matInput type="text" [(ngModel)]="playlistRef" (ngModelChange)="onPlaylistInput($event)">
         <mat-hint class="mat-error" *ngIf="inputPlayListErrorMessage">{{inputPlayListErrorMessage}}</mat-hint>
     </mat-form-field>
